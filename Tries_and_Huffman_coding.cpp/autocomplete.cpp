@@ -1,0 +1,202 @@
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+class TrieNode
+{
+public:
+    char data;
+    TrieNode **children;
+    bool isTerminal;
+
+    TrieNode(char data)
+    {
+        this->data = data;
+        children = new TrieNode *[26];
+        for (int i = 0; i < 26; i++)
+        {
+            children[i] = NULL;
+        }
+        isTerminal = false;
+    }
+};
+
+class Trie
+{
+    TrieNode *root;
+
+public:
+    int count;
+
+    Trie()
+    {
+        this->count = 0;
+        root = new TrieNode('\0');
+    }
+
+    bool insertWord(TrieNode *root, string word)
+    {
+        // Base case
+        if (word.size() == 0)
+        {
+            if (!root->isTerminal)
+            {
+                root->isTerminal = true;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        // Small calculation
+        int index = word[0] - 'a';
+        TrieNode *child;
+
+        if (root->children[index] != NULL)
+        {
+            child = root->children[index];
+        }
+        else
+        {
+            child = new TrieNode(word[0]);
+            root->children[index] = child;
+        }
+
+        // Recursive call
+        return insertWord(child, word.substr(1));
+    }
+
+    void insertWord(string word)
+    {
+        if (insertWord(root, word))
+        {
+            this->count++;
+        }
+    }
+
+    void helper(TrieNode *root, string help, vector<string> &finAns)
+    {
+
+        bool rVal = true;
+        for (int i = 0; i < 26; i++)
+        {
+            if (root->children[i] != NULL)
+            {
+                rVal = false;
+            }
+        }
+
+        if (rVal)
+        {
+            string str(1, root->data);
+            finAns.push_back(help + str);
+            return;
+        }
+
+        for (int i = 0; i < 26; i++)
+        {
+
+            if (root->children[i] != NULL)
+            {
+                // if(root->isTerminal){
+                helper(root->children[i], help + root->data, finAns);
+                // }
+                // else{
+                //     helper(root->children[i], help+root->data, finAns);
+                // }
+
+                bool chk = true;
+
+                for (int i = 0; i < finAns.size(); i++)
+                {
+                    string str(1, root->data);
+                    if (finAns[i] == str)
+                    {
+                        chk = false;
+                        break;
+                    }
+                }
+
+                if (chk)
+                {
+                    if (root->isTerminal == true)
+                    {
+                        int j;
+                        // for(j = 0; j < finAns.size(); j++){
+                        // finAns[j] = root->data + finAns[j];
+                        // }
+                        string str(1, root->data);
+                        finAns.push_back(help + str);
+                    }
+                }
+            }
+        }
+    }
+
+    void autoComplete(vector<string> input, string pattern)
+    {
+
+        for (int i = 0; i < input.size(); i++)
+        {
+            insertWord(input[i]);
+        }
+
+        string help = "";
+        TrieNode *temp = root;
+
+        for (int i = 0; i < pattern.size(); i++)
+        {
+            int index = pattern[i] - 'a';
+            if (temp->children[index] != NULL)
+            {
+                temp = temp->children[index];
+            }
+            else
+            {
+                return;
+            }
+        }
+        if (temp->isTerminal)
+        {
+            cout << pattern << endl;
+        }
+
+        for (int i = 0; i < 26; i++)
+        {
+            vector<string> ans;
+            if (temp->children[i] != NULL)
+            {
+                helper(temp->children[i], help, ans);
+
+                for (int j = 0; j < ans.size(); j++)
+                {
+                    cout << pattern + ans[j] << endl;
+                }
+            }
+        }
+    }
+};
+
+int main()
+{
+    Trie t;
+    int n;
+    cin >> n;
+
+    vector<string> vect;
+
+    for (int i = 0; i < n; ++i)
+    {
+        string word;
+        cin >> word;
+        vect.push_back(word);
+    }
+
+    string pattern;
+    cin >> pattern;
+
+    t.autoComplete(vect, pattern);
+}
