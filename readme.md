@@ -1,0 +1,1 @@
+This is a repository which contains all the codes and pdf notes of the coding ninjas course on Basics of C++ with data structures and algorithms.
